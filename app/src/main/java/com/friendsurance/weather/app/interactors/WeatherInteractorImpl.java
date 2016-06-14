@@ -27,6 +27,10 @@ import rx.subscriptions.CompositeSubscription;
 
 /**
  * Created by mohamed on 07/06/16.
+ *
+ * An interface implementation where all related usecases implemented
+ *
+ *
  */
 public class WeatherInteractorImpl implements WeatherInteractor{
 
@@ -65,7 +69,6 @@ public class WeatherInteractorImpl implements WeatherInteractor{
                     @Override
                     public CurrentWeather call(final CurrentWeatherDataEnvelope data) {
 
-                        Log.e("data", data.locationName + data.main.temp_max);
                         return new CurrentWeather(data.locationName, data.timestamp,
                                 data.weather.get(0).description, data.main.temp,
                                 data.main.temp_min, data.main.temp_max , data.main.humidity , data.main.pressure);

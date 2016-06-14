@@ -2,6 +2,8 @@ package com.friendsurance.weather.app.utils;
 
 /**
  * Created by mohamed on 14/06/16.
+ *
+ * All application constatnts goes here
  */
 public  class Constants {
 

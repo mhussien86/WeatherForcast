@@ -8,6 +8,9 @@ import java.util.HashMap;
 
 /**
  * Created by mohamed on 06/06/16.
+ *
+ *
+ *
  */
 public class WeatherPresenterImpl implements WeatherPresenter , WeatherInteractor.OnRequestFinished {
 
