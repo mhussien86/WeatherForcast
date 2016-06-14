@@ -1,3 +1,20 @@
 <resources>
-    <string name="app_name">Weather Forcast App</string>
+    <string name="app_name">Weather Forecast App</string>
+
+
+    <string name="today.date">Date</string>
+    <string name="city.name">City Name</string>
+
+    <string name="today">Today</string>
+    <string name="tomorrow">Tomorrow</string>
+    <string name="monday">Monday</string>
+
+    <string name="humidity">Humidity</string>
+    <string name="pressure">Pressure</string>
+    <string name="high.temp">High Temperature</string>
+    <string name="low.temp">Low Temperature</string>
+
+
+    <string name="empty.view">No weather available please start by searching for specific city</string>
+
 </resources>
