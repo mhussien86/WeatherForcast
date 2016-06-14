@@ -21,7 +21,7 @@ public interface WeatherApi {
     Observable<CurrentWeatherDataEnvelope> fetchCurrentWeather(@Query("q") String cityName);
 
     // api to get forecast weather data for comming 5 days
-    @GET("forecast/daily?units=metric&cnt=6&appid=" + API_KEY)
+    @GET("forecast/daily?units=metric&cnt=7&appid=" + API_KEY)
     Observable<WeatherForecastListDataEnvelope> fetchWeatherForecasts(@Query("q") String cityName);
 
 }
