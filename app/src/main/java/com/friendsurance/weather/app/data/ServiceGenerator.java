@@ -19,16 +19,21 @@ public class ServiceGenerator {
     private static final String API_BASE_URL = "http://api.openweathermap.org/data/2.5/";
 
 
-    private static OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
+    OkHttpClient.Builder httpClient;
+    Retrofit.Builder builder;
 
-    private static Retrofit.Builder builder = new Retrofit.Builder()
-            .baseUrl(API_BASE_URL)
-            .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
-            .addConverterFactory(GsonConverterFactory.create());
+    public ServiceGenerator(){
+        httpClient = new OkHttpClient.Builder();
+        builder = new Retrofit.Builder()
+                .baseUrl(API_BASE_URL)
+                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create());
+    }
+
 
 
     // method to create any retrofit service
-    public static <T> T createService(Class<T> serviceClass) {
+    public  <T> T createService(Class<T> serviceClass) {
 
         HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
         // set your desired log level
@@ -55,8 +60,6 @@ public class ServiceGenerator {
 
         OkHttpClient client = httpClient.build();
         Retrofit retrofit = builder.client(client).build();
-
-
         return retrofit.create(serviceClass);
     }
 

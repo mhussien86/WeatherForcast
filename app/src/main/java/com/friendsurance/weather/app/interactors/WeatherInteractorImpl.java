@@ -41,7 +41,7 @@ public class WeatherInteractorImpl implements WeatherInteractor{
     WeatherApi weatherService ;
 
     public WeatherInteractorImpl(){
-        weatherService = ServiceGenerator.createService(WeatherApi.class);
+        weatherService = new ServiceGenerator().createService(WeatherApi.class);
         mCompositeSubscription = new CompositeSubscription();
 
 
