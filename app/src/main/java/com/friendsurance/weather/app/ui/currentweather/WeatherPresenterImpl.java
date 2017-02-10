@@ -26,8 +26,10 @@ public class WeatherPresenterImpl implements WeatherPresenter , WeatherInteracto
     }
     @Override
     public void getWeatherForCity(String cityName) {
-
-        weatherInteractor.loadAllData(cityName,this);
+        if(weatherView!=null) {
+            weatherView.showLoading();
+            weatherInteractor.loadAllData(cityName, this);
+        }
     }
 
     @Override
@@ -40,9 +42,10 @@ public class WeatherPresenterImpl implements WeatherPresenter , WeatherInteracto
 
     @Override
     public void onDataFetchedSuccessful(HashMap<String, WeatherDataEnvelope> weatherData) {
-
-
-        weatherView.onWeatherFetchedSuccessfully(weatherData);
+        if(weatherView!=null) {
+            weatherView.hideLoading();
+            weatherView.onWeatherFetchedSuccessfully(weatherData);
+        }
 
     }
 

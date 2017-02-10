@@ -1,20 +1,20 @@
 package com.friendsurance.weather.app.ui.currentweather;
 
-import android.app.SearchManager;
-import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.view.MenuItemCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.SearchView;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -23,24 +23,22 @@ import com.friendsurance.weather.app.R;
 import com.friendsurance.weather.app.models.CurrentWeatherDataEnvelope;
 import com.friendsurance.weather.app.models.WeatherDataEnvelope;
 import com.friendsurance.weather.app.models.WeatherForecastListDataEnvelope;
+import com.friendsurance.weather.app.ui.OnCitySelectedListner;
 import com.friendsurance.weather.app.utils.Constants;
 import com.friendsurance.weather.app.utils.DayFormatter;
 import com.friendsurance.weather.app.utils.TemperatureFormatter;
-
 import java.util.HashMap;
-
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
 /**
  * Created by mohamed on 06/06/16.
  */
-public class WeatherFragment extends Fragment implements WeatherView {
+public class WeatherFragment extends Fragment implements WeatherView ,OnCitySelectedListner{
 
 
     WeatherPresenter weatherPresenter ;
     View rootView ;
-    SearchView searchView = null;
 
 
     @Bind(R.id.city_name)
@@ -74,10 +72,15 @@ public class WeatherFragment extends Fragment implements WeatherView {
     @Bind(R.id.cardList)
     RecyclerView mWeatherList;
 
+    ButterKnife binder;
+    Toolbar toolbar;
+
+    private String cityName = "" ;
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+        getActivity().invalidateOptionsMenu();
     }
 
     @Nullable
@@ -86,51 +89,44 @@ public class WeatherFragment extends Fragment implements WeatherView {
 
         rootView = inflater.inflate(R.layout.fragment_weather,container,false);
         weatherPresenter = new WeatherPresenterImpl(this);
-        ButterKnife.bind(this,rootView);
+        binder.bind(this,rootView);
         mWeatherLayout.setVisibility(View.GONE);
-        addStubView();
+        toolbar = (Toolbar) rootView.findViewById(R.id.toolbar);
+        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
         return rootView ;
     }
 
+    ImageView refreshIcon = null ;
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 
-        inflater.inflate(R.menu.menu, menu);
-        searchView = (SearchView) MenuItemCompat.getActionView(menu.findItem(R.id.action_search));
-        SearchManager searchManager = (SearchManager) getActivity().getSystemService(Context.SEARCH_SERVICE);
-        searchView.setSearchableInfo(searchManager.getSearchableInfo(getActivity().getComponentName()));
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+        inflater.inflate(R.menu.menu_refresh, menu);
+        refreshIcon = (ImageView) menu.findItem(R.id.action_refresh).getActionView();
+        refreshIcon.setImageResource(android.R.drawable.stat_notify_sync);
 
+        refreshIcon.setOnClickListener(new View.OnClickListener() {
             @Override
-            public boolean onQueryTextChange(String newText) {
-                return false;
+            public void onClick(View view) {
+                Animation rotation = AnimationUtils.loadAnimation(getActivity(), R.anim.clockwise_refresh);
+                rotation.setRepeatCount(Animation.INFINITE);
+                refreshIcon.startAnimation(rotation);
+                weatherPresenter.getWeatherForCity(getCityName());
             }
-
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-
-                // Do your task here
-                showLoading();
-                weatherPresenter.getWeatherForCity(searchView.getQuery().toString());
-                return false;
-            }
-
         });
-
+        super.onCreateOptionsMenu(menu, inflater);
     }
-
 
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-        return super.onOptionsItemSelected(item);
+            return super.onOptionsItemSelected(item);
     }
     @Override
     public void onDestroyView() {
         weatherPresenter.onDestroy();
-        ButterKnife.unbind(this);
+        binder.unbind(this);
         super.onDestroyView();
     }
 
@@ -150,20 +146,26 @@ public class WeatherFragment extends Fragment implements WeatherView {
 
     @Override
     public void showError() {
-
+        clearAnimationForRefreshIcon();
         mWeatherLayout.setVisibility(View.GONE);
         addStubView();
 
     }
 
+    public void clearAnimationForRefreshIcon(){
+        if (refreshIcon!=null)refreshIcon.clearAnimation();
+    }
     @Override
     public void onWeatherFetchedSuccessfully(HashMap<String, WeatherDataEnvelope> weatherData) {
 
+        clearAnimationForRefreshIcon();
         hideLoading();
+
         mWeatherLayout.setVisibility(View.VISIBLE);
         removeStubView();
         CurrentWeatherDataEnvelope currentWeatherDataEnvelope = (CurrentWeatherDataEnvelope)weatherData.get(Constants.KEY_CURRENT_WEATHER);
         mCityName.setText(currentWeatherDataEnvelope.locationName);
+        toolbar.setTitle(currentWeatherDataEnvelope.locationName);
         mDate.setText(new DayFormatter(getContext()).format(currentWeatherDataEnvelope.timestamp));
         mHighTemperature.setText(TemperatureFormatter.format(currentWeatherDataEnvelope.main.temp_max));
         mLowTemperature.setText(TemperatureFormatter.format(currentWeatherDataEnvelope.main.temp_min));
@@ -202,6 +204,14 @@ public class WeatherFragment extends Fragment implements WeatherView {
 
     @Override
     public String getCityName() {
-        return searchView.getQuery().toString();
+        return cityName;
+    }
+
+    @Override
+    public void onCityChanged(String cityName) {
+        this.cityName = cityName ;
+        weatherPresenter = new WeatherPresenterImpl(this);
+        weatherPresenter.getWeatherForCity(cityName);
+
     }
 }

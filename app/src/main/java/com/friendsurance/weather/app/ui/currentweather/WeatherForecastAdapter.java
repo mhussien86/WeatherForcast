@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import com.bumptech.glide.Glide;
 import com.friendsurance.weather.app.R;
 import com.friendsurance.weather.app.models.WeatherForecastListDataEnvelope;
@@ -23,11 +24,12 @@ import butterknife.ButterKnife;
 public class WeatherForecastAdapter extends RecyclerView.Adapter<WeatherForecastAdapter.ViewHolder> {
 
     private List<WeatherForecastListDataEnvelope.ForecastDataEnvelope> weatherList = new ArrayList<>();
-
     private Context context ;
+
     public WeatherForecastAdapter(Context context, WeatherForecastListDataEnvelope weatherList) {
         this.weatherList = weatherList.list;
         this.context = context ;
+
     }
 
 
