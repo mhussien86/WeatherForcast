@@ -1,6 +1,6 @@
 # WeatherForcast
 
-A WeatherForcast using MVP-Clean architecture
+A WeatherForcast using MVP-Clean architecture & [OpenWeatherMapAPI](http://api.openweathermap.org/data/2.5/)
 
 ### What is this repository for? ###
 
