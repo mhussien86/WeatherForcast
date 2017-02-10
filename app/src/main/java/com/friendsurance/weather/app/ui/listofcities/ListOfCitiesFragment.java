@@ -3,6 +3,7 @@ package com.friendsurance.weather.app.ui.listofcities;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
@@ -22,7 +23,9 @@ import android.widget.EditText;
 import com.friendsurance.weather.app.R;
 import com.friendsurance.weather.app.models.City;
 import com.friendsurance.weather.app.ui.OnCitySelectedListner;
+import com.friendsurance.weather.app.ui.utils.FileUtils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 import butterknife.Bind;
@@ -66,23 +69,34 @@ public class ListOfCitiesFragment extends Fragment implements ListOfCitiesAdapte
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         citiesList.setLayoutManager(layoutManager);
-        arrayList = new ArrayList<>();
-        arrayList.add(new City("Jeddah", true));
-        arrayList.add(new City("Cairo", false));
-        arrayList.add(new City("Dublin", false));
-        arrayList.add(new City("London", false));
-        arrayList.add(new City("Barcelona", false));
+        arrayList = readSavedData();
+        if(arrayList==null || arrayList.isEmpty()){
+            arrayList = new ArrayList<>();
+            arrayList.add(new City("Jeddah", true));
+            arrayList.add(new City("Cairo", false));
+            arrayList.add(new City("Dublin", false));
+            arrayList.add(new City("London", false));
+            arrayList.add(new City("Barcelona", false));
+            writeSavedData(arrayList);
+        }
+
         citiesAdapter = new ListOfCitiesAdapter(getActivity(), arrayList,this);
         citiesList.setHasFixedSize(true);
         citiesList.setAdapter(citiesAdapter);
 
-    }
+        Handler handler = new Handler();
+        handler.postAtTime(new Runnable() {
+            @Override
+            public void run() {
+                for (int i =0 ; i < arrayList.size(); i++){
+                    if(arrayList.get(i).isSelected()){
+                        if(onCitySelectedListner!=null)onCitySelectedListner.onCityChanged(arrayList.get(i).getCityName());
+                    }
+                }
+            }
+        },3000);
 
-//    @Override
-//    public void onStart() {
-//        super.onStart();
-//        if(onCitySelectedListner!=null)onCitySelectedListner.onCityChanged(arrayList.get(0).getCityName());
-//    }
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -118,6 +132,7 @@ public class ListOfCitiesFragment extends Fragment implements ListOfCitiesAdapte
                     EditText cityEditText = (EditText) dialogView.findViewById(R.id.cityEditText);
                     if(!TextUtils.isEmpty(cityEditText.getText())){
                         arrayList.add(new City(cityEditText.getText().toString(),false));
+                        writeSavedData(arrayList);
                         citiesAdapter.notifyDataSetChanged();
                     }
 
@@ -126,6 +141,7 @@ public class ListOfCitiesFragment extends Fragment implements ListOfCitiesAdapte
             builder.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
+
 
                 }
             });
@@ -147,15 +163,40 @@ public class ListOfCitiesFragment extends Fragment implements ListOfCitiesAdapte
     public void selectedItem(City city) {
         for(int i = 0 ; i < arrayList.size(); i++){
             arrayList.get(i).setSelected(false);
+            if(city.getCityName().equalsIgnoreCase(arrayList.get(i).getCityName())){
+            arrayList.get(i).setSelected(true);
+            }
         }
-        city.setSelected(true);
         onCitySelectedListner.onCityChanged(city.getCityName());
         citiesAdapter.notifyDataSetChanged();
+        writeSavedData(arrayList);
     }
 
     @Override
     public void deleteItem(City city) {
         arrayList.remove(city);
+        writeSavedData(arrayList);
         citiesAdapter.notifyDataSetChanged();
+    }
+
+    public ArrayList<City> readSavedData(){
+
+        ArrayList<City> cityArrayList = new ArrayList<>();
+        try {
+            cityArrayList = (ArrayList<City>) FileUtils.readObject(getContext(),"data");
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return cityArrayList;
+    }
+
+    public void writeSavedData(ArrayList<City> cityArrayList){
+        try {
+            FileUtils.writeObject(getContext(),"data",cityArrayList);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

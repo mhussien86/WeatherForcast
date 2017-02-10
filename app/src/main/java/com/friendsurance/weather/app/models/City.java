@@ -1,9 +1,11 @@
 package com.friendsurance.weather.app.models;
 
+import java.io.Serializable;
+
 /**
  * Created by mohamed on 09/02/17.
  */
-public class City {
+public class City implements Serializable{
 
 
     String cityName ;
